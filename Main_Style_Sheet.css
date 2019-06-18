@@ -1,0 +1,18 @@
+﻿body {
+    width:auto;
+}
+
+.title{
+    font-size:x-large;
+
+}
+
+.Username{
+    width:100%;
+    float:right;
+}
+
+.menuBar{
+    float:left;
+    width:100%;
+}

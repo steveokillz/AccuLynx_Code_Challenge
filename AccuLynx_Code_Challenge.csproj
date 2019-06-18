@@ -128,6 +128,8 @@
     <None Include="Scripts\jquery-3.3.1.intellisense.js" />
     <Content Include="Help.aspx" />
     <Content Include="Main.aspx" />
+    <Content Include="Main_Style_Sheet.css" />
+    <Content Include="My_Questions.aspx" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
     <Content Include="Scripts\jquery-3.3.1.js" />
@@ -181,6 +183,13 @@
     </Compile>
     <Compile Include="Main.aspx.designer.cs">
       <DependentUpon>Main.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="My_Questions.aspx.cs">
+      <DependentUpon>My_Questions.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="My_Questions.aspx.designer.cs">
+      <DependentUpon>My_Questions.aspx</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Site.Master.cs">
