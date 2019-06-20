@@ -54,13 +54,14 @@
 
                 <asp:SqlDataSource ID="StackQuestions" runat="server" ConnectionString="<%$ ConnectionStrings:AcculynxConnectionString %>" SelectCommand="SELECT TOP (10) Question_ID, Title, Current_Owner FROM Question_List"></asp:SqlDataSource>
 
-                <asp:GridView ID="My_Questions" runat="server" AutoGenerateColumns="False" DataKeyNames="ID" DataSourceID="GetUserQuestions" AllowPaging="True" CellPadding="4" ForeColor="#333333" GridLines="None">
+                <asp:GridView ID="My_Questions" runat="server" AutoGenerateColumns="False" DataSourceID="GetUserQuestions" AllowPaging="True" CellPadding="4" ForeColor="#333333" GridLines="None">
                     <AlternatingRowStyle BackColor="White" ForeColor="#284775" />
                     <Columns>
-                        <asp:BoundField DataField="ID" HeaderText="ID" InsertVisible="False" ReadOnly="True" SortExpression="ID" Visible="false" />
-                        <asp:BoundField DataField="Question_ID" HeaderText="Question_ID" SortExpression="Question_ID" />
-                        <asp:BoundField DataField="Question_Information" HeaderText="Question_Information" SortExpression="Question_Information" />
-                        <asp:BoundField DataField="Username" HeaderText="Username" SortExpression="Username"/>
+                        <asp:HyperLinkField DataTextField="Question_ID" DataNavigateUrlFields="Question_ID" HeaderText="Question_ID" DataNavigateUrlFormatString="~/My_Questions.aspx?ID={0}" SortExpression="Question_ID" />
+                        <asp:BoundField DataField="Title" HeaderText="Title" SortExpression="Title" />
+                        <asp:CheckBoxField DataField="Is_Answered" HeaderText="Is_Answered" SortExpression="Is_Answered" />
+                        <asp:BoundField DataField="Answer_Date" HeaderText="Answer_Date" SortExpression="Answer_Date" />
+                        <asp:BoundField DataField="Num_of_Guesses" HeaderText="Num_of_Guesses" SortExpression="Num_of_Guesses"/>
                     </Columns>
                     <EditRowStyle BackColor="#999999" />
                     <EmptyDataTemplate>There is no data for you, please look at some questions!</EmptyDataTemplate>
@@ -74,7 +75,7 @@
                     <SortedDescendingCellStyle BackColor="#FFFDF8" />
                     <SortedDescendingHeaderStyle BackColor="#6F8DAE" />
                 </asp:GridView>
-                <asp:SqlDataSource ID="GetUserQuestions" runat="server" ConnectionString="<%$ ConnectionStrings:AcculynxConnectionString %>" SelectCommand="SELECT Questions.ID, Questions.Question_ID, Questions.Question_Information, Users.Username FROM Questions INNER JOIN Users ON Questions.User_ID = Users.ID">
+                <asp:SqlDataSource ID="GetUserQuestions" runat="server" ConnectionString="<%$ ConnectionStrings:AcculynxConnectionString %>" SelectCommand="SELECT Question_List.Title, Question_List.Is_Answered, Question_List.Answer_Date, Question_List.Num_of_Guesses, Question_List.Question_ID FROM Question_List INNER JOIN Users ON Question_List.Current_Owner = Users.ID">
                 </asp:SqlDataSource>
             </div>
             <asp:Label ID="ErrorMsg" runat="server" Visible="false"></asp:Label>

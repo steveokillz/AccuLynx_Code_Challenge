@@ -1,14 +1,10 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Web;
-using System.Net;
-using System.IO;
 using System.Data.SqlClient;
-using System.Data;
+using System.Net;
 using System.Net.Http;
-using Newtonsoft.Json;
+using System.Web;
 
 namespace AccuLynx_Code_Challenge
 {
@@ -50,8 +46,8 @@ namespace AccuLynx_Code_Challenge
             try
             {
                 string query = "Select ID from Users where Username = @User";
-                SqlCommand command = new SqlCommand(query, conn);               
-                command.Parameters.AddWithValue("@User", user);               
+                SqlCommand command = new SqlCommand(query, conn);
+                command.Parameters.AddWithValue("@User", user);
                 conn.Open();
                 object userid = command.ExecuteScalar();
                 UserID.Text = userid.ToString();
@@ -84,10 +80,10 @@ namespace AccuLynx_Code_Challenge
             SqlConnection conn = new SqlConnection(connection);
             SqlCommand command = new SqlCommand(query, conn);
             conn.Open();
-            using(SqlDataReader read = command.ExecuteReader())
+            using (SqlDataReader read = command.ExecuteReader())
             {
                 //This is to check if there is an actual value in here!
-                if(read.HasRows.Equals(false))
+                if (read.HasRows.Equals(false))
                 {
                     GetAPICallAsync();
                 }
@@ -98,7 +94,7 @@ namespace AccuLynx_Code_Challenge
         //We should only Run this once to get a list of inital data, otherwise were wasting api calls....
         protected void GetAPICallAsync()
         {
-            var URL = "https://api.stackexchange.com/2.2/questions?order=desc&sort=activity&site=stackoverflow";
+            var URL = "https://api.stackexchange.com/2.2/questions?order=desc&sort=activity&site=stackoverflow&filter=withbody";
             HttpClientHandler handler = new HttpClientHandler();
             handler.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
             HttpClient client = new HttpClient(handler);
@@ -114,9 +110,9 @@ namespace AccuLynx_Code_Challenge
                 RootObject obj = JsonConvert.DeserializeObject<RootObject>(JSON);
 
                 string connection = connURL();
-                
 
-                string query = "Insert into dbo.Question_List (Question_ID, Title) Values (@Question_ID, @Title)";
+
+                string query = "If not exists(Select 1 from Question_List where Question_ID = @Question_ID) Insert into dbo.Question_List (Question_ID, Title, Body) Values (@Question_ID, @Title, @Body)";
                 //Set up the connection string
                 SqlConnection conn = new SqlConnection(connection);
                 foreach (Item stacklist in obj.items)
@@ -128,6 +124,7 @@ namespace AccuLynx_Code_Challenge
                         SqlCommand command = new SqlCommand(query, conn);
                         command.Parameters.AddWithValue("@Question_ID", stacklist.question_id);
                         command.Parameters.AddWithValue("@Title", stacklist.title);
+                        command.Parameters.AddWithValue("@Body", stacklist.Body);
                         conn.Open();
                         command.ExecuteNonQuery();
                         conn.Close();
@@ -148,23 +145,23 @@ namespace AccuLynx_Code_Challenge
             public int? accept_rate { get; set; }
         }
 
-        public class Item
+        public partial class Item
         {
-            public List<string> tags { get; set; }
-            public Owner owner { get; set; }
+            public string[] Tags { get; set; }
+            public Owner Owner { get; set; }
             public bool is_answered { get; set; }
-            public int view_count { get; set; }
-            public int answer_count { get; set; }
-            public int score { get; set; }
-            public int last_activity_date { get; set; }
-            public int creation_date { get; set; }
-            public int question_id { get; set; }
-            public string link { get; set; }
+            public long ViewCount { get; set; }
+            public long AcceptedAnswerId { get; set; }
+            public long AnswerCount { get; set; }
+            public long Score { get; set; }
+            public long LastActivityDate { get; set; }
+            public long CreationDate { get; set; }
+            public long question_id { get; set; }
+            public Uri Link { get; set; }
             public string title { get; set; }
-            public int? last_edit_date { get; set; }
-            public int? accepted_answer_id { get; set; }
-            public int? protected_date { get; set; }
+            public string Body { get; set; }
         }
+
 
         public class RootObject
         {
@@ -175,7 +172,9 @@ namespace AccuLynx_Code_Challenge
         }
         protected void New_Quesitons_Click(object sender, EventArgs e)
         {
-
+            //Just Recall the Api call method
+            GetAPICallAsync();
+            Stack_Quesitons.DataBind();
         }
 
         private static string connectionString()
