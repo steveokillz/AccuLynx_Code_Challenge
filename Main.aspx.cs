@@ -79,7 +79,7 @@ namespace AccuLynx_Code_Challenge
         protected void checkQuestionTable()
         {
             string connection = connURL();
-            string query = "Select TOP(1) Question_ID from dbo.Questions";
+            string query = "Select TOP(1) Question_ID from dbo.Question_List";
             //Set up the connection string
             SqlConnection conn = new SqlConnection(connection);
             SqlCommand command = new SqlCommand(query, conn);
@@ -87,7 +87,7 @@ namespace AccuLynx_Code_Challenge
             using(SqlDataReader read = command.ExecuteReader())
             {
                 //This is to check if there is an actual value in here!
-                if(read.Read())
+                if(read.HasRows.Equals(false))
                 {
                     GetAPICallAsync();
                 }
@@ -116,19 +116,22 @@ namespace AccuLynx_Code_Challenge
                 string connection = connURL();
                 
 
-                string query = "Insert into dbo.Question_List (Question_ID, Is_Answered, Title) Values (@Question_ID, @Answered, @Title)";
+                string query = "Insert into dbo.Question_List (Question_ID, Title) Values (@Question_ID, @Title)";
                 //Set up the connection string
                 SqlConnection conn = new SqlConnection(connection);
                 foreach (Item stacklist in obj.items)
                 {
-                    //Insert a new user into the Users table, if they are already there then dont insert them!
-                    SqlCommand command = new SqlCommand(query, conn);
-                    command.Parameters.AddWithValue("@Question_ID", stacklist.question_id);
-                    command.Parameters.AddWithValue("@Answered", stacklist.is_answered);
-                    command.Parameters.AddWithValue("@Title", stacklist.title);
-                    conn.Open();
-                    command.ExecuteNonQuery();
-                    conn.Close();
+                    //We only want questions that are answered on the website
+                    if (stacklist.is_answered == true)
+                    {
+                        //Insert a new user into the Users table, if they are already there then dont insert them!
+                        SqlCommand command = new SqlCommand(query, conn);
+                        command.Parameters.AddWithValue("@Question_ID", stacklist.question_id);
+                        command.Parameters.AddWithValue("@Title", stacklist.title);
+                        conn.Open();
+                        command.ExecuteNonQuery();
+                        conn.Close();
+                    }
                 }
             }
 
@@ -195,7 +198,7 @@ namespace AccuLynx_Code_Challenge
 
             //Since this is a 1 time call then we can use a sql query
             //TODO make this a stored procedure for further protection against sql injection if necessary
-            string query = "Select Question_ID, Is_Answered, Title, Current_Owner from Question_List where Current_Owner = @UserID ";
+            string query = "Select Question_ID, Title, Current_Owner from Question_List where Current_Owner = @UserID ";
             //Set up the connection string
             SqlConnection conn = new SqlConnection(connection);
             //We will need parameters from the Label.

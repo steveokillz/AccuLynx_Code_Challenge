@@ -33,16 +33,12 @@
                 </div>
             <br />
             <div>
-                <asp:GridView ID="Stack_Quesitons" runat="server" AutoGenerateColumns="False" DataKeyNames="ID" DataSourceID="StackQuestions" CellPadding="4" ForeColor="#333333" GridLines="None">
+                <asp:GridView ID="Stack_Quesitons" runat="server" AutoGenerateColumns="False" DataKeyNames="Question_ID" DataSourceID="StackQuestions" CellPadding="4" ForeColor="#333333" GridLines="None">
                     <AlternatingRowStyle BackColor="White" ForeColor="#284775" />
                     <Columns>
-                        <asp:BoundField DataField="ID" HeaderText="ID" InsertVisible="False" ReadOnly="True" SortExpression="ID" Visible="false"/>
-                        <asp:BoundField DataField="Question_ID" HeaderText="Question_ID" SortExpression="Question_ID" Visible="false" />
+                        <asp:HyperLinkField DataTextField="Question_ID" DataNavigateUrlFields="Question_ID" HeaderText="Question_ID" DataNavigateUrlFormatString="~/My_Questions.aspx?ID={0}" SortExpression="Question_ID" />
                         <asp:BoundField DataField="Title" HeaderText="Title" SortExpression="Title" />
-                        <asp:CheckBoxField DataField="Is_Answered" HeaderText="Is_Answered" SortExpression="Is_Answered" />
-                        <asp:BoundField DataField="Answered_By" HeaderText="Answered_By" SortExpression="Answered_By" />
-                        <asp:BoundField DataField="Answer_Date" HeaderText="Answer_Date" SortExpression="Answer_Date" />
-                        <asp:BoundField DataField="Num_of_Guesses" HeaderText="Num_of_Guesses" SortExpression="Num_of_Guesses" />                     
+                        <asp:BoundField DataField="Current_Owner" HeaderText="Current_Owner" SortExpression="Current_Owner" />                     
                     </Columns>
                     <EditRowStyle BackColor="#999999" />
                     <FooterStyle BackColor="#5D7B9D" Font-Bold="True" ForeColor="White" />
@@ -56,7 +52,7 @@
                     <SortedDescendingHeaderStyle BackColor="#6F8DAE" />
                 </asp:GridView>
 
-                <asp:SqlDataSource ID="StackQuestions" runat="server" ConnectionString="<%$ ConnectionStrings:AcculynxConnectionString %>" SelectCommand="SELECT TOP (10) ID, Question_ID, Is_Answered, Answered_By, Answer_Date, Num_of_Guesses, Title FROM Question_List"></asp:SqlDataSource>
+                <asp:SqlDataSource ID="StackQuestions" runat="server" ConnectionString="<%$ ConnectionStrings:AcculynxConnectionString %>" SelectCommand="SELECT TOP (10) Question_ID, Title, Current_Owner FROM Question_List"></asp:SqlDataSource>
 
                 <asp:GridView ID="My_Questions" runat="server" AutoGenerateColumns="False" DataKeyNames="ID" DataSourceID="GetUserQuestions" AllowPaging="True" CellPadding="4" ForeColor="#333333" GridLines="None">
                     <AlternatingRowStyle BackColor="White" ForeColor="#284775" />
@@ -64,7 +60,7 @@
                         <asp:BoundField DataField="ID" HeaderText="ID" InsertVisible="False" ReadOnly="True" SortExpression="ID" Visible="false" />
                         <asp:BoundField DataField="Question_ID" HeaderText="Question_ID" SortExpression="Question_ID" />
                         <asp:BoundField DataField="Question_Information" HeaderText="Question_Information" SortExpression="Question_Information" />
-                        <asp:BoundField DataField="Username" HeaderText="Username" SortExpression="Username" />
+                        <asp:BoundField DataField="Username" HeaderText="Username" SortExpression="Username"/>
                     </Columns>
                     <EditRowStyle BackColor="#999999" />
                     <EmptyDataTemplate>There is no data for you, please look at some questions!</EmptyDataTemplate>
