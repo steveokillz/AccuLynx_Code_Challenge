@@ -49,15 +49,6 @@ namespace AccuLynx_Code_Challenge {
         protected global::System.Web.UI.WebControls.Menu Menu1;
         
         /// <summary>
-        /// Question control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label Question;
-        
-        /// <summary>
         /// QuestionTitle control.
         /// </summary>
         /// <remarks>
@@ -65,6 +56,15 @@ namespace AccuLynx_Code_Challenge {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Label QuestionTitle;
+        
+        /// <summary>
+        /// Question control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label Question;
         
         /// <summary>
         /// CommentGridfield control.
@@ -92,5 +92,32 @@ namespace AccuLynx_Code_Challenge {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Label UserID;
+        
+        /// <summary>
+        /// AnswerID control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label AnswerID;
+        
+        /// <summary>
+        /// TotalScore control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label TotalScore;
+        
+        /// <summary>
+        /// IsCorrect control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label IsCorrect;
     }
 }

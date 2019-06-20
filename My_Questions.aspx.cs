@@ -19,6 +19,7 @@ namespace AccuLynx_Code_Challenge
             GetStackQuestions();
             fillGridview();
             updateQuestionList();
+            getQuestion();
         }
         //This willuse JSON to get the comments and the correct answer to the question
         //We can either pull all the comments with the correct question
@@ -41,15 +42,21 @@ namespace AccuLynx_Code_Challenge
                 RootObject obj = JsonConvert.DeserializeObject<RootObject>(JSON);
 
                 string connection = connURL();
-                string query = "If not exists(Select 1 from Questions where Question_ID = @Question_ID) Insert into dbo.Questions Values (@Question_ID, @Question_Information, @User_ID, @Correct_Answer, @Score_Of_Answer)";
+                string query = "If not exists(Select 1 from Questions where Answer_ID = @Answer_ID) Insert into dbo.Questions Values (@Question_ID, @Answer_ID, @Question_Information, @User_ID, @Correct_Answer, @Score_Of_Answer)";
                 //Set up the connection string
                 SqlConnection conn = new SqlConnection(connection);
                 try
                 {
+                    //To help DB load i will store the correct answer and the score of answer in a hidden label.
+                    
+                    int highScore = 0;
+                    string ans_ID = "";
+                    bool correct_ans = false;
                     foreach (Item stacklist in obj.Items)
                     {
                         SqlCommand command = new SqlCommand(query, conn);
                         command.Parameters.AddWithValue("@Question_ID", QuestionID.Text.ToString());
+                        command.Parameters.AddWithValue("@Answer_ID", stacklist.answer_id);
                         command.Parameters.AddWithValue("@Question_Information", stacklist.Body);
                         command.Parameters.AddWithValue("@User_ID", UserID.Text.ToString());
                         command.Parameters.AddWithValue("@Correct_Answer", stacklist.is_accepted);
@@ -57,7 +64,26 @@ namespace AccuLynx_Code_Challenge
                         conn.Open();
                         command.ExecuteNonQuery();
                         conn.Close();
+
+                        int highScorenew = Convert.ToInt32(stacklist.Score);
+                        string ans_IDnew = stacklist.answer_id.ToString();
+                        bool correct_ansnew = Convert.ToBoolean(stacklist.is_accepted);
+
+                        if(highScorenew > highScore)
+                        {
+                            highScore = highScorenew;
+                            ans_ID = ans_IDnew;
+                            correct_ans = correct_ansnew;
+                        }
                     }
+                    if (correct_ans == false)
+                    {
+                        IsCorrect.Visible = true;
+                        IsCorrect.Text = "NOTE: There is no correct answer in this. In this case the correct answer will be the best score";
+                    }
+                    AnswerID.Text = ans_ID.ToString();
+                    TotalScore.Text = highScore.ToString();
+                    IsCorrect.Text = correct_ans.ToString();
                 }
                 catch (Exception e)
                 {
@@ -75,11 +101,12 @@ namespace AccuLynx_Code_Challenge
         protected void fillGridview()
         {
             //Call the SQL method to get questions
-            string connection = connURL();
 
+            string connection = connURL();
             //Since this is a 1 time call then we can use a sql query
             //TODO make this a stored procedure for further protection against sql injection if necessary
-            string query = "Select Question_ID, Question_Information, Correct_Answer, Score_Of_Answer from Questions where Question_ID = @Question_ID ";
+
+            string query = "Select Answer_ID, Question_Information, Correct_Answer, Score_Of_Answer from Questions where Question_ID = @Question_ID ";
             //Set up the connection string
             SqlConnection conn = new SqlConnection(connection);
             SqlCommand command = new SqlCommand(query, conn);
@@ -90,22 +117,21 @@ namespace AccuLynx_Code_Challenge
             CommentGridfield.DataSource = read;
             CommentGridfield.DataBind();
             conn.Close();
-
         }
-
         //New owner of the questions needs to be updated in the table
         protected void updateQuestionList()
         {
             string connection = connURL();
 
-            string query = "Update Question_List set Current_Owner = @Owner";
+            string query = "Update Question_List set Current_Owner = @Owner where Question_ID = @Question";
             //Set up the connection string
             SqlConnection conn = new SqlConnection(connection);
             try
             {
                 //Update the Questions_List table to give them the owner id
                 SqlCommand command = new SqlCommand(query, conn);
-                command.Parameters.AddWithValue("@User", UserID.Text.ToString());
+                command.Parameters.AddWithValue("@Owner", UserID.Text.ToString());
+                command.Parameters.AddWithValue("@Question", QuestionID.Text.ToString());
                 conn.Open();
                 command.ExecuteNonQuery();
                 //Close the connection
@@ -138,7 +164,7 @@ namespace AccuLynx_Code_Challenge
             public long LastActivityDate { get; set; }
             public long? LastEditDate { get; set; }
             public long CreationDate { get; set; }
-            public long AnswerId { get; set; }
+            public long answer_id { get; set; }
             public long QuestionId { get; set; }
             public string Body { get; set; }
         }
@@ -190,6 +216,38 @@ namespace AccuLynx_Code_Challenge
             {
                 conn.Close();
             }
+        }
+
+        //get the question
+        protected void getQuestion()
+        {
+            string connection = connURL();
+            SqlConnection conn = new SqlConnection(connection);
+            try
+            {
+                string query = "Select Body from Question_List where Question_ID = @Question_ID";
+                SqlCommand command = new SqlCommand(query, conn);
+                command.Parameters.AddWithValue("@Question_ID", QuestionID.Text.ToString());
+                conn.Open();
+                object question = command.ExecuteScalar();
+                Question.Text = question.ToString();
+                conn.Close();
+            }
+            catch (Exception e)
+            {
+                ErrorMsg.Visible = true;
+                ErrorMsg.Text = "There was an error getting the userID please diagnose this error: " + e.ToString();
+            }
+            finally
+            {
+                conn.Close();
+            }
+        }
+
+        protected void Submit_Click(object sender, EventArgs e)
+        {
+            //check to see if the answer is correct OR if the guess score is the highest
+
         }
     }
 }

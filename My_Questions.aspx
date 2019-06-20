@@ -31,8 +31,8 @@
                 </asp:Menu>
             </div>
         <div>
-            <asp:Label ID="Question" runat="server" Text="Your Question: "></asp:Label>
-            <asp:Label ID="QuestionTitle" runat="server"></asp:Label>
+            <asp:Label ID="QuestionTitle" runat="server" Text="Question: "></asp:Label>
+            <asp:Label ID="Question" runat="server"></asp:Label>
             <asp:GridView ID="CommentGridfield" runat="server" CellPadding="4" ForeColor="#333333" GridLines="None">
                 <AlternatingRowStyle BackColor="White" ForeColor="#284775" />
                 <EditRowStyle BackColor="#999999" />
@@ -45,11 +45,21 @@
                 <SortedAscendingHeaderStyle BackColor="#506C8C" />
                 <SortedDescendingCellStyle BackColor="#FFFDF8" />
                 <SortedDescendingHeaderStyle BackColor="#6F8DAE" />
+                <Columns>
+                    <asp:TemplateField>
+                        <ItemTemplate>
+                            <asp:Button ID="Submit"  Text="Submit Answer" runat="server" OnClick="Submit_Click" ValidateRequestMode="Enabled" />
+                        </ItemTemplate>
+                    </asp:TemplateField>
+                </Columns>
             </asp:GridView>
         </div>
         <div>
             <asp:Label ID="QuestionID" runat="server" Visible="false"></asp:Label>
             <asp:Label ID="UserID" runat="server" Visible="false"></asp:Label>
+            <asp:Label ID="AnswerID" runat="server" Text="Label" Visible="false"></asp:Label>
+            <asp:Label ID="TotalScore" runat="server" Text="Label" Visible="false"></asp:Label>
+            <asp:Label ID="IsCorrect" runat="server" Text="Label" Visible="false"></asp:Label>
         </div>
     </form>
 </body>

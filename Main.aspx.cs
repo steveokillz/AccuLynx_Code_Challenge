@@ -199,19 +199,16 @@ namespace AccuLynx_Code_Challenge
             //TODO make this a stored procedure for further protection against sql injection if necessary
             string query = "Select Question_ID, Title, Current_Owner from Question_List where Current_Owner = @UserID ";
             //Set up the connection string
-            SqlConnection conn = new SqlConnection(connection);
             //We will need parameters from the Label.
             //In this case we will be using the Computer name as a userid
-            SqlCommand command = new SqlCommand(query);
-            command.Parameters.AddWithValue("@UserID", UserID.Text);
+            SqlConnection conn = new SqlConnection(connection);
+            SqlCommand command = new SqlCommand(query, conn);
+            command.Parameters.AddWithValue("@UserID", UserID.Text.ToString());
             conn.Open();
             //Databind the data into the sql statements
             SqlDataReader read = command.ExecuteReader();
-            My_Questions.DataSource = read;
             My_Questions.DataBind();
             conn.Close();
-
-
         }
     }
 }
