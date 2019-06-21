@@ -4,6 +4,7 @@ using System.Data.SqlClient;
 using System.Net;
 using System.Net.Http;
 using System.Web;
+using System.Web.UI.WebControls;
 
 namespace AccuLynx_Code_Challenge
 {
@@ -12,14 +13,17 @@ namespace AccuLynx_Code_Challenge
         
         protected void Page_Load(object sender, EventArgs e)
         {
-            string userMachine = HttpContext.Current.Server.MachineName;
-            Label1.Text = "Welcome User: " + userMachine;
-            QuestionID.Text = Request["ID"].ToString();
-            getUserID(userMachine);
-            GetStackQuestions();
-            fillGridview();
-            updateQuestionList();
-            getQuestion();
+
+                string userMachine = HttpContext.Current.Server.MachineName;
+                Label1.Text = "Welcome User: " + userMachine;
+                QuestionID.Text = Request["ID"].ToString();
+                getUserID(userMachine);
+                GetStackQuestions();
+                fillGridview();
+                updateQuestionList();
+                getQuestion();
+
+
         }
         //This willuse JSON to get the comments and the correct answer to the question
         //We can either pull all the comments with the correct question
@@ -106,7 +110,7 @@ namespace AccuLynx_Code_Challenge
             //Since this is a 1 time call then we can use a sql query
             //TODO make this a stored procedure for further protection against sql injection if necessary
 
-            string query = "Select Answer_ID, Question_Information, Correct_Answer, Score_Of_Answer from Questions where Question_ID = @Question_ID ";
+            string query = "Select Answer_ID, Question_Information, Correct_Answer, Score_Of_Answer, button_disabled from Questions where Question_ID = @Question_ID ";
             //Set up the connection string
             SqlConnection conn = new SqlConnection(connection);
             SqlCommand command = new SqlCommand(query, conn);
@@ -118,6 +122,7 @@ namespace AccuLynx_Code_Challenge
             CommentGridfield.DataBind();
             conn.Close();
         }
+
         //New owner of the questions needs to be updated in the table
         protected void updateQuestionList()
         {
@@ -244,10 +249,72 @@ namespace AccuLynx_Code_Challenge
             }
         }
 
-        protected void Submit_Click(object sender, EventArgs e)
+        protected void submitBtn_Click(object sender, EventArgs e)
         {
-            //check to see if the answer is correct OR if the guess score is the highest
+            Button button = (Button)sender;
 
+            GridViewRow gridViewRow = (GridViewRow)button.NamingContainer;
+            //Now we have the row where the button was submitted
+            int index = gridViewRow.RowIndex;
+            checkAnswer(index);
+            //We want to check if that was the right answer OR the highest score (if there is no right answer)
+
+        }
+
+        protected void checkAnswer(int index)
+        {
+            int row = index;
+            string connection = connURL();
+            SqlConnection conn = new SqlConnection(connection);
+            try
+            {
+                GridViewRow viewRow = CommentGridfield.Rows[row];
+                //we Have the answerid now to check if that was the right answer.
+                string answerID = viewRow.Cells[1].Text.ToString();
+
+                string query = "Select TOP(1) Answer_ID, MAX(Score_Of_Answer) from Questions where Question_ID = @Question_ID OR (Question_ID = @Question_ID AND Correct_Answer = 1) group by Answer_ID,Correct_Answer, Score_Of_Answer order by Correct_Answer DESC, Score_Of_Answer DESC ";
+                SqlCommand command = new SqlCommand(query, conn);
+                command.Parameters.AddWithValue("@Question_ID", QuestionID.Text.ToString());
+                conn.Open();
+                object question = command.ExecuteScalar();
+                string correctAnwser = question.ToString();
+                if(correctAnwser.Equals(answerID))
+                {
+                    //Update the number of guesses as well as update the user score
+                    query = "Update Question_List set Num_of_Guesses = Num_of_Guesses + 1, Is_Answered = 1, Answered_By = @UserID, Answer_Date = GETDATE() where Question_ID = @Question";
+                    SqlCommand command2 = new SqlCommand(query, conn);
+                    command2.Parameters.AddWithValue("@Question", QuestionID.Text.ToString());
+                    command2.ExecuteNonQuery();
+                    Response.Write("<script>alert('That is the Correct Answer!!');</script>");
+                }
+                else
+                {
+                    query = "Update Question_List set Num_of_Guesses = Num_of_Guesses + 1 where Question_ID = @Question";
+                    SqlCommand command2 = new SqlCommand(query, conn);
+                    //Update the number of guesses as well as set the disable button to 1 so that you dont keep guessing it.
+
+                    command2.Parameters.AddWithValue("@Question", QuestionID.Text.ToString());
+                    //conn.Open();
+                    command2.ExecuteNonQuery();
+                    //I would honestly make this into a stored procedure so that we wouldnt make multiple calls to the DB as well as keeping the code "dry"
+                                        query = "Update Questions set button_disabled = 1 where Answer_ID = @Answer_ID";
+                    SqlCommand command3 = new SqlCommand(query, conn);
+
+                    command3.Parameters.AddWithValue("@Answer_ID", answerID.ToString());
+                    //conn.Open();
+                    command3.ExecuteNonQuery();
+
+                    Response.Write("<script>alert('That is not the correct answer, please try again...');</script>");
+                }
+            }
+            catch(Exception e)
+            {
+
+            }
+            finally
+            {
+                conn.Close();
+            }
         }
     }
 }

@@ -112,7 +112,7 @@ namespace AccuLynx_Code_Challenge
                 string connection = connURL();
 
 
-                string query = "If not exists(Select 1 from Question_List where Question_ID = @Question_ID) Insert into dbo.Question_List (Question_ID, Title, Body) Values (@Question_ID, @Title, @Body)";
+                string query = "If not exists(Select 1 from Question_List where Question_ID = @Question_ID and Current_Owner = @User) Insert into dbo.Question_List (Question_ID, Title, Body) Values (@Question_ID, @Title, @Body)";
                 //Set up the connection string
                 SqlConnection conn = new SqlConnection(connection);
                 foreach (Item stacklist in obj.items)
@@ -125,6 +125,7 @@ namespace AccuLynx_Code_Challenge
                         command.Parameters.AddWithValue("@Question_ID", stacklist.question_id);
                         command.Parameters.AddWithValue("@Title", stacklist.title);
                         command.Parameters.AddWithValue("@Body", stacklist.Body);
+                        command.Parameters.AddWithValue("@User", Convert.ToInt32(UserID.Text.ToString()));
                         conn.Open();
                         command.ExecuteNonQuery();
                         conn.Close();
