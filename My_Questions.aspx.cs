@@ -18,12 +18,33 @@ namespace AccuLynx_Code_Challenge
                 Label1.Text = "Welcome User: " + userMachine;
                 QuestionID.Text = Request["ID"].ToString();
                 getUserID(userMachine);
-                GetStackQuestions();
+                check_Questions();
                 fillGridview();
                 updateQuestionList();
                 getQuestion();
 
 
+        }
+        //Help limit API calls
+        protected void check_Questions()
+        {
+            string connection = connURL();
+            string query = "Select TOP(1) Question_ID from dbo.Questions where Question_ID = @Question_ID and User_ID = @User_ID";
+            //Set up the connection string
+            SqlConnection conn = new SqlConnection(connection);
+            SqlCommand command = new SqlCommand(query, conn);
+            command.Parameters.AddWithValue("@Question_ID", QuestionID.Text.ToString());
+            command.Parameters.AddWithValue("@User_ID", UserID.Text.ToString());
+            conn.Open();
+            using (SqlDataReader read = command.ExecuteReader())
+            {
+                //This is to check if there is an actual value in here!
+                if (read.HasRows.Equals(false))
+                {
+                    GetStackQuestions();
+                }
+            }
+            conn.Close();
         }
         //This willuse JSON to get the comments and the correct answer to the question
         //We can either pull all the comments with the correct question
@@ -46,16 +67,12 @@ namespace AccuLynx_Code_Challenge
                 RootObject obj = JsonConvert.DeserializeObject<RootObject>(JSON);
 
                 string connection = connURL();
-                string query = "If not exists(Select 1 from Questions where Answer_ID = @Answer_ID) Insert into dbo.Questions Values (@Question_ID, @Answer_ID, @Question_Information, @User_ID, @Correct_Answer, @Score_Of_Answer)";
+                string query = "If not exists(Select 1 from Questions where Answer_ID = @Answer_ID) Insert into dbo.Questions Values (@Question_ID, @Answer_ID, @Question_Information, @User_ID, @Correct_Answer, @Score_Of_Answer, @Button_disabled)";
                 //Set up the connection string
                 SqlConnection conn = new SqlConnection(connection);
                 try
                 {
-                    //To help DB load i will store the correct answer and the score of answer in a hidden label.
-                    
-                    int highScore = 0;
-                    string ans_ID = "";
-                    bool correct_ans = false;
+
                     foreach (Item stacklist in obj.Items)
                     {
                         SqlCommand command = new SqlCommand(query, conn);
@@ -65,29 +82,11 @@ namespace AccuLynx_Code_Challenge
                         command.Parameters.AddWithValue("@User_ID", UserID.Text.ToString());
                         command.Parameters.AddWithValue("@Correct_Answer", stacklist.is_accepted);
                         command.Parameters.AddWithValue("@Score_Of_Answer", stacklist.Score);
+                        command.Parameters.AddWithValue("@Button_disabled", 0);
                         conn.Open();
                         command.ExecuteNonQuery();
                         conn.Close();
-
-                        int highScorenew = Convert.ToInt32(stacklist.Score);
-                        string ans_IDnew = stacklist.answer_id.ToString();
-                        bool correct_ansnew = Convert.ToBoolean(stacklist.is_accepted);
-
-                        if(highScorenew > highScore)
-                        {
-                            highScore = highScorenew;
-                            ans_ID = ans_IDnew;
-                            correct_ans = correct_ansnew;
-                        }
                     }
-                    if (correct_ans == false)
-                    {
-                        IsCorrect.Visible = true;
-                        IsCorrect.Text = "NOTE: There is no correct answer in this. In this case the correct answer will be the best score";
-                    }
-                    AnswerID.Text = ans_ID.ToString();
-                    TotalScore.Text = highScore.ToString();
-                    IsCorrect.Text = correct_ans.ToString();
                 }
                 catch (Exception e)
                 {
@@ -261,6 +260,203 @@ namespace AccuLynx_Code_Challenge
 
         }
 
+        protected void updateCorrectAnswer()
+        {
+            string connection = connURL();
+
+            string query = "Update Question_List set Num_of_Guesses = Num_of_Guesses + 1, Is_Answered = 1, Answered_By = @UserID, Answer_Date = GETDATE() where Question_ID = @Question";
+            //Set up the connection string
+            SqlConnection conn = new SqlConnection(connection);
+            try
+            {
+                //Update the Questions_List table to give them the owner id
+                SqlCommand command = new SqlCommand(query, conn);
+                command.Parameters.AddWithValue("@UserID", UserID.Text.ToString());
+                command.Parameters.AddWithValue("@Question", QuestionID.Text.ToString());
+                conn.Open();
+                command.ExecuteNonQuery();
+                //Close the connection
+                conn.Close();
+            }
+            catch (Exception e)
+            {
+                ErrorMsg.Visible = true;
+                ErrorMsg.Text = "There was an error updating the question: " + e.ToString();
+            }
+            finally
+            {
+                conn.Close();
+            }
+        }
+
+        protected void updateIncorrectQuestion()
+        {
+            string connection = connURL();
+
+            string query = "Update Question_List set Num_of_Guesses = Num_of_Guesses + 1 where Question_ID = @Question";
+            //Set up the connection string
+            SqlConnection conn = new SqlConnection(connection);
+            try
+            {
+                //Update the Questions_List table to give them the owner id
+                SqlCommand command = new SqlCommand(query, conn);
+                command.Parameters.AddWithValue("@Question", QuestionID.Text.ToString());
+                conn.Open();
+                command.ExecuteNonQuery();
+                //Close the connection
+                conn.Close();
+            }
+            catch (Exception e)
+            {
+                ErrorMsg.Visible = true;
+                ErrorMsg.Text = "There was an error updating the question: " + e.ToString();
+            }
+            finally
+            {
+                conn.Close();
+            }
+        }
+
+        protected void updateIncorrectAnswer(string answerid)
+        {
+            string connection = connURL();
+
+            string query = "Update Questions set button_disabled = 1 where Answer_ID = @Answer_ID";
+            //Set up the connection string
+            SqlConnection conn = new SqlConnection(connection);
+            try
+            {
+                SqlCommand command = new SqlCommand(query, conn);
+                command.Parameters.AddWithValue("@Answer_ID", answerid.ToString());
+                conn.Open();
+                command.ExecuteNonQuery();
+                //Close the connection
+                conn.Close();
+            }
+            catch (Exception e)
+            {
+                ErrorMsg.Visible = true;
+                ErrorMsg.Text = "There was an error updating the question: " + e.ToString();
+            }
+            finally
+            {
+                conn.Close();
+            }
+        }
+
+        protected int ReturnNumOfGuesses()
+        {
+            string connection = connURL();
+            SqlConnection conn = new SqlConnection(connection);
+            try
+            {
+                string query = "Select Num_Of_Guesses from Question_List where Question_ID = @Question_ID";
+                SqlCommand command = new SqlCommand(query, conn);
+                command.Parameters.AddWithValue("@Question_ID", QuestionID.Text.ToString());
+                conn.Open();
+                object question = command.ExecuteScalar();
+                conn.Close();
+                return Convert.ToInt32(question.ToString());
+            }
+            catch (Exception e)
+            {
+                ErrorMsg.Visible = true;
+                ErrorMsg.Text = "There was an error getting the userID please diagnose this error: " + e.ToString();
+                return 99;
+            }
+            finally
+            {
+                conn.Close();
+            }
+        }
+
+        protected int totalScore(int guesses)
+        {
+            string connection = connURL();
+            SqlConnection conn = new SqlConnection(connection);
+            try
+            {
+                string query = "Select Guess_Score from Guess_Score where Num_Of_Guesses = @guesses";
+                SqlCommand command = new SqlCommand(query, conn);
+                command.Parameters.AddWithValue("@guesses", guesses);
+                conn.Open();
+                object guess = command.ExecuteScalar();
+                conn.Close();
+                return Convert.ToInt32(guess.ToString());
+            }
+            catch (Exception e)
+            {
+                ErrorMsg.Visible = true;
+                ErrorMsg.Text = "There was an error getting the userID please diagnose this error: " + e.ToString();
+                return 99;
+            }
+            finally
+            {
+                conn.Close();
+            }
+        }
+
+        protected void updateUserScore()
+        {
+            string connection = connURL();
+            int guesses = ReturnNumOfGuesses();
+
+            //if its less than 6 update the users total score
+            if (guesses < 6)
+            {
+                int score_total = totalScore(guesses);
+                string query = "Update Users set Total_Score = Total_Score + @Score where ID = @UserID";
+                //Set up the connection string
+                SqlConnection conn = new SqlConnection(connection);
+                try
+                {
+                    SqlCommand command = new SqlCommand(query, conn);
+                    command.Parameters.AddWithValue("@UserID", UserID.Text.ToString());
+                    command.Parameters.AddWithValue("@Score", score_total);
+                    conn.Open();
+                    command.ExecuteNonQuery();
+                    //Close the connection
+                    conn.Close();
+                }
+                catch (Exception e)
+                {
+                    ErrorMsg.Visible = true;
+                    ErrorMsg.Text = "There was an error updating the question: " + e.ToString();
+                }
+                finally
+                {
+                    conn.Close();
+                }
+            }
+        }
+
+        protected void addCorrectAnswers()
+        {
+            string connection = connURL();
+
+            string query = "Update Users set Correct_Answers = Correct_Answers + 1 where ID = @UserID";
+            //Set up the connection string
+            SqlConnection conn = new SqlConnection(connection);
+            try
+            {
+                SqlCommand command = new SqlCommand(query, conn);
+                command.Parameters.AddWithValue("@UserID", UserID.Text.ToString());
+                conn.Open();
+                command.ExecuteNonQuery();
+                //Close the connection
+                conn.Close();
+            }
+            catch (Exception e)
+            {
+                ErrorMsg.Visible = true;
+                ErrorMsg.Text = "There was an error updating the question: " + e.ToString();
+            }
+            finally
+            {
+                conn.Close();
+            }
+        }
+
         protected void checkAnswer(int index)
         {
             int row = index;
@@ -270,7 +466,7 @@ namespace AccuLynx_Code_Challenge
             {
                 GridViewRow viewRow = CommentGridfield.Rows[row];
                 //we Have the answerid now to check if that was the right answer.
-                string answerID = viewRow.Cells[1].Text.ToString();
+                string answerID = viewRow.Cells[0].Text.ToString();
 
                 string query = "Select TOP(1) Answer_ID, MAX(Score_Of_Answer) from Questions where Question_ID = @Question_ID OR (Question_ID = @Question_ID AND Correct_Answer = 1) group by Answer_ID,Correct_Answer, Score_Of_Answer order by Correct_Answer DESC, Score_Of_Answer DESC ";
                 SqlCommand command = new SqlCommand(query, conn);
@@ -281,28 +477,15 @@ namespace AccuLynx_Code_Challenge
                 if(correctAnwser.Equals(answerID))
                 {
                     //Update the number of guesses as well as update the user score
-                    query = "Update Question_List set Num_of_Guesses = Num_of_Guesses + 1, Is_Answered = 1, Answered_By = @UserID, Answer_Date = GETDATE() where Question_ID = @Question";
-                    SqlCommand command2 = new SqlCommand(query, conn);
-                    command2.Parameters.AddWithValue("@Question", QuestionID.Text.ToString());
-                    command2.ExecuteNonQuery();
-                    Response.Write("<script>alert('That is the Correct Answer!!');</script>");
+                    updateCorrectAnswer();
+                    updateUserScore();
+                    addCorrectAnswers();
+                    Response.Write("<script>alert('That is the correct answer!');</script>");
                 }
                 else
                 {
-                    query = "Update Question_List set Num_of_Guesses = Num_of_Guesses + 1 where Question_ID = @Question";
-                    SqlCommand command2 = new SqlCommand(query, conn);
-                    //Update the number of guesses as well as set the disable button to 1 so that you dont keep guessing it.
-
-                    command2.Parameters.AddWithValue("@Question", QuestionID.Text.ToString());
-                    //conn.Open();
-                    command2.ExecuteNonQuery();
-                    //I would honestly make this into a stored procedure so that we wouldnt make multiple calls to the DB as well as keeping the code "dry"
-                                        query = "Update Questions set button_disabled = 1 where Answer_ID = @Answer_ID";
-                    SqlCommand command3 = new SqlCommand(query, conn);
-
-                    command3.Parameters.AddWithValue("@Answer_ID", answerID.ToString());
-                    //conn.Open();
-                    command3.ExecuteNonQuery();
+                    updateIncorrectQuestion();
+                    updateIncorrectAnswer(answerID);
 
                     Response.Write("<script>alert('That is not the correct answer, please try again...');</script>");
                 }

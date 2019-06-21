@@ -1,10 +1,11 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="My_Questions.aspx.cs" Inherits="AccuLynx_Code_Challenge.My_Questions" EnableEventValidation="False" %>
+﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="HallOfFame.aspx.cs" Inherits="AccuLynx_Code_Challenge.HallOfFame" %>
+
 <!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
     <link rel="stylesheet" href="Main_Style_Sheet.css" />
-    <title>Question</title>
+    <title>Hall Of Fame</title>
 </head>
 <body>
     <form id="form1" runat="server">
@@ -32,10 +33,19 @@
                 </asp:Menu>
             </div>
         <div>
-            <asp:Label ID="QuestionTitle" runat="server" Text="Question: " Height="2em"></asp:Label>
-            <asp:Label ID="Question" runat="server" Height="2em"></asp:Label>
-            <asp:GridView ID="CommentGridfield" runat="server" CellPadding="4" ForeColor="#333333" GridLines="None"  autogeneratecolumns="false">
+            <asp:Label ID="Label2" runat="server" Text="TOP USERS" Font-Size="2.5em"></asp:Label>
+            </div>
+        <div>
+            <asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="False" CellPadding="4" DataKeyNames="ID" DataSourceID="SqlDataSource1" ForeColor="#333333" GridLines="None">
                 <AlternatingRowStyle BackColor="White" ForeColor="#284775" />
+                <Columns>
+                    <asp:BoundField DataField="ID" HeaderText="ID" InsertVisible="False" ReadOnly="True" SortExpression="ID" />
+                    <asp:BoundField DataField="Username" HeaderText="Username" SortExpression="Username" />
+                    <asp:BoundField DataField="Created_Date" HeaderText="Created_Date" SortExpression="Created_Date" />
+                    <asp:BoundField DataField="Correct_Answers" HeaderText="Correct_Answers" SortExpression="Correct_Answers" />
+                    <asp:BoundField DataField="Total_Score" HeaderText="Total_Score" SortExpression="Total_Score" />
+                </Columns>
+                <EmptyDataTemplate>There is no users yet! Answer some questions!</EmptyDataTemplate>
                 <EditRowStyle BackColor="#999999" />
                 <FooterStyle BackColor="#5D7B9D" Font-Bold="True" ForeColor="White" />
                 <HeaderStyle BackColor="#5D7B9D" Font-Bold="True" ForeColor="White" />
@@ -46,27 +56,8 @@
                 <SortedAscendingHeaderStyle BackColor="#506C8C" />
                 <SortedDescendingCellStyle BackColor="#FFFDF8" />
                 <SortedDescendingHeaderStyle BackColor="#6F8DAE" />
-                <Columns>
-                    <asp:BoundField HeaderText="Answer_ID" DataField="Answer_ID" Visible="true"/>
-                    <asp:BoundField HeaderText="Answer" DataField="Question_Information" HtmlEncode="false" />  
-                    <asp:BoundField HeaderText="Correct_Answer" DataField="Correct_Answer" Visible="false" />  
-                    <asp:BoundField HeaderText="Score_Of_Answer" DataField="Score_Of_Answer" Visible="false" />  
-                    <asp:BoundField HeaderText="button_disabled" DataField="button_disabled" Visible="false"/>  
-                    <asp:TemplateField HeaderText="Submit Answer">
-                        <ItemTemplate>
-                            <asp:Button ID="submitBtn" runat="server" CommandName="CheckAnswer" Text="CheckAnswer" OnClick="submitBtn_Click" Enabled='<%# Eval("button_disabled").ToString().Equals("False".ToString()) ? Convert.ToBoolean(1) : Convert.ToBoolean(0) %>'/>
-                        </ItemTemplate>
-                    </asp:TemplateField>
-                </Columns>
             </asp:GridView>
-                    </div>
-        <div>
-            <asp:Label ID="QuestionID" runat="server" Visible="false"></asp:Label>
-            <asp:Label ID="UserID" runat="server" Visible="false"></asp:Label>
-            <asp:Label ID="AnswerID" runat="server" Text="Label" Visible="false"></asp:Label>
-            <asp:Label ID="TotalScore" runat="server" Text="Label" Visible="false"></asp:Label>
-            <asp:Label ID="IsCorrect" runat="server" Text="Label" Visible="false"></asp:Label>
-
+            <asp:SqlDataSource ID="SqlDataSource1" runat="server" ConnectionString="<%$ ConnectionStrings:AcculynxConnectionString %>" SelectCommand="SELECT TOP (5) ID, Username, Created_Date, Correct_Answers, MAX(Total_Score) AS Total_Score FROM Users GROUP BY ID, Username, Created_Date, Correct_Answers ORDER BY Total_Score DESC, ID DESC, Username DESC, Created_Date DESC, Correct_Answers DESC"></asp:SqlDataSource>
         </div>
     </form>
 </body>

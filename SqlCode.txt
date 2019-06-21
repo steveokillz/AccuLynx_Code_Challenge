@@ -1,39 +1,8 @@
-﻿USE [Acculynx]
-GO
-
-/****** Object:  Table [dbo].[Question_List]    Script Date: 6/19/2019 9:07:28 PM ******/
-SET ANSI_NULLS ON
-GO
-
-SET QUOTED_IDENTIFIER ON
-GO
-
-CREATE TABLE [dbo].[Question_List](
-	[ID] [int] IDENTITY(1,1) NOT NULL,
-	[Question_ID] [bigint] NOT NULL,
-	[Is_Answered] [bit] NULL,
-	[Answered_By] [int] NULL,
-	[Answer_Date] [datetime] NULL,
-	[Num_of_Guesses] [int] NULL,
-	[Title] [varchar](max) NULL,
-	[Current_Owner] [int] NULL,
- CONSTRAINT [PK_Question_List] PRIMARY KEY CLUSTERED 
-(
-	[ID] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
-GO
-
-ALTER TABLE [dbo].[Question_List] ADD  CONSTRAINT [DF_Question_List_Is_Answered]  DEFAULT ((0)) FOR [Is_Answered]
-GO
-
-
-
-
+﻿
 USE [Acculynx]
 GO
 
-/****** Object:  Table [dbo].[Users]    Script Date: 6/19/2019 9:07:56 PM ******/
+/****** Object:  Table [dbo].[Users]    Script Date: 6/21/2019 1:29:44 AM ******/
 SET ANSI_NULLS ON
 GO
 
@@ -41,7 +10,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 
 CREATE TABLE [dbo].[Users](
-	[ID] [bigint] IDENTITY(1,1) NOT NULL,
+	[ID] [int] IDENTITY(1,1) NOT NULL,
 	[Username] [varchar](255) NOT NULL,
 	[Created_Date] [datetime] NOT NULL,
 	[Correct_Answers] [int] NULL,
@@ -57,4 +26,103 @@ GO
 ALTER TABLE [dbo].[Users] ADD  CONSTRAINT [DF_Users_Created_Date]  DEFAULT (getdate()) FOR [Created_Date]
 GO
 
+ALTER TABLE [dbo].[Users] ADD  CONSTRAINT [DF_Users_Correct_Answers]  DEFAULT ((0)) FOR [Correct_Answers]
+GO
 
+ALTER TABLE [dbo].[Users] ADD  CONSTRAINT [DF_Users_Total_Score]  DEFAULT ((0)) FOR [Total_Score]
+GO
+
+
+
+
+USE [Acculynx]
+GO
+
+/****** Object:  Table [dbo].[Questions]    Script Date: 6/21/2019 1:29:41 AM ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[Questions](
+	[ID] [bigint] IDENTITY(1,1) NOT NULL,
+	[Question_ID] [varchar](255) NOT NULL,
+	[Answer_ID] [varchar](255) NOT NULL,
+	[Question_Information] [varchar](max) NOT NULL,
+	[User_ID] [int] NULL,
+	[Correct_Answer] [bit] NULL,
+	[Score_Of_Answer] [int] NULL,
+	[button_disabled] [bit] NULL,
+ CONSTRAINT [PK__Question__3214EC277E5DF4FE] PRIMARY KEY CLUSTERED 
+(
+	[ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+
+ALTER TABLE [dbo].[Questions] ADD  CONSTRAINT [DF_Questions_Score_Of_Answer]  DEFAULT ((0)) FOR [Score_Of_Answer]
+GO
+
+ALTER TABLE [dbo].[Questions] ADD  CONSTRAINT [DF_Questions_button_disabled]  DEFAULT ((0)) FOR [button_disabled]
+GO
+
+
+USE [Acculynx]
+GO
+
+/****** Object:  Table [dbo].[Question_List]    Script Date: 6/21/2019 1:29:36 AM ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[Question_List](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[Question_ID] [bigint] NOT NULL,
+	[Is_Answered] [bit] NULL,
+	[Answered_By] [int] NULL,
+	[Answer_Date] [datetime] NULL,
+	[Num_of_Guesses] [int] NULL,
+	[Title] [varchar](max) NULL,
+	[Current_Owner] [int] NULL,
+	[Body] [varchar](max) NULL,
+ CONSTRAINT [PK_Question_List] PRIMARY KEY CLUSTERED 
+(
+	[ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+
+ALTER TABLE [dbo].[Question_List] ADD  CONSTRAINT [DF_Question_List_Is_Answered]  DEFAULT ((0)) FOR [Is_Answered]
+GO
+
+ALTER TABLE [dbo].[Question_List] ADD  CONSTRAINT [DF_Question_List_Num_of_Guesses]  DEFAULT ((0)) FOR [Num_of_Guesses]
+GO
+
+
+USE [Acculynx]
+GO
+
+/****** Object:  Table [dbo].[Guess_Score]    Script Date: 6/21/2019 1:29:27 AM ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[Guess_Score](
+	[ID] [bigint] IDENTITY(1,1) NOT NULL,
+	[Num_Of_Guesses] [int] NOT NULL,
+	[Guess_Score] [int] NOT NULL,
+ CONSTRAINT [PK_Guess_Score] PRIMARY KEY CLUSTERED 
+(
+	[ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
+  Insert into Guess_Score
+  Values
+  (1,10), (2,8), (3,6), (4,4), (5,2), (6,0)

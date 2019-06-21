@@ -19,6 +19,7 @@
                     <Items>
                         <asp:MenuItem NavigateUrl="~/My_Questions.aspx" Text="My Questions" Value="My Questions"></asp:MenuItem>
                         <asp:MenuItem Text="Help" Value="Help" NavigateUrl="~/Help.aspx"></asp:MenuItem>
+                        <asp:MenuItem NavigateUrl="~/HallOfFame.aspx" Text="Top Users" Value="Top Users"></asp:MenuItem>
                     </Items>
                     <StaticHoverStyle BackColor="#7C6F57" ForeColor="White" />
                     <StaticMenuItemStyle HorizontalPadding="5px" VerticalPadding="2px" />
